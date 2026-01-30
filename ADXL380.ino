@@ -5,7 +5,7 @@ static const int PIN_MISO = 19;  // MI
 static const int PIN_MOSI = 18;  // MO
 static const int CS_PIN   = 12;   // choose any free GPIO
 
-SPISettings adxlSPI(200000, MSBFIRST, SPI_MODE0);
+SPISettings adxlSPI(1000000, MSBFIRST, SPI_MODE0);
 
 // Registers
 static const uint8_t REG_DEVID   = 0x00;
@@ -20,11 +20,13 @@ static const uint8_t REG_ZDATA_L = 0x1A;
 
 static const uint8_t REG_OP_MODE = 0x26;
 static const uint8_t REG_DIG_EN  = 0x27;
-static const uint8_t FIFO_CFG0  = 0x30;
-static const uint8_t REG_FIFO_DATA  = 0x1D;
+static const uint8_t FIFO_CFG0 = 0x30;
 int Status0 = 0b00000010;
+uint16_t values[4000];
+float gvalues[4000];
+
 int counter = 0;
-uint16_t zvalue[6400];
+
 
 static inline uint8_t CMD(uint8_t addr, bool read) {
   return (uint8_t)((addr << 1) | (read ? 1 : 0));
@@ -64,11 +66,10 @@ float counts_to_g(int16_t counts, uint8_t range_bits) {
   return (float)counts / lsb_per_g;
 }
 
-
 void setup() {
   Serial.begin(115200);
   delay(300);
-  Serial.println("Chekcpoint");
+  
   pinMode(CS_PIN, OUTPUT);
   digitalWrite(CS_PIN, HIGH);
 
@@ -98,63 +99,56 @@ void setup() {
   // 5) Read back what we wrote (this is the key!)
   uint8_t dig_en = adxl_read8(REG_DIG_EN);
   uint8_t op_mode = adxl_read8(REG_OP_MODE);
-  //Serial.print("DIG_EN readback = 0x"); Serial.println(dig_en, HEX);
-  //Serial.print("OP_MODE readback = 0x"); Serial.println(op_mode, HEX);
-
+  Serial.print("DIG_EN readback = 0x"); Serial.println(dig_en, HEX);
+  Serial.print("OP_MODE readback = 0x"); Serial.println(op_mode, HEX);
 }
 
-void loop() 
-{
+void loop() {
   //int Status = adxl_read8(REG_DIG_EN);
   //Serial.println(Status, BIN);
-  //delay(100); //Status Abfrage Register welche Werte sind enabled
-  if(counter == 6400)
-  {
-    counter = 0;
-  }  
-  if(counter < 6400)
-  {
-  if (adxl_read8(0x11) & (1 << 1))
-    {
-    
-    SPI.beginTransaction(adxlSPI);
-    digitalWrite(CS_PIN, LOW);
-    SPI.transfer(REG_FIFO_DATA << 1|0x01);
-    for (int i = 0; i<320;i++)
-    {  
-    uint8_t hi = SPI.transfer(0x00);
-    uint8_t lo = SPI.transfer(0x00);
-    digitalWrite(CS_PIN, HIGH);
-    zvalue[counter] = (SPI.transfer(0x00) <<8)| SPI.transfer(0x00);
-    //Serial.println(zvalue[counter]);
-    Serial.println(counter);
-    counter++;
-    }
-    digitalWrite(CS_PIN, HIGH);
-    SPI.endTransaction();
-    }
-  }
-  
-} 
-
-/*  int16_t z = adxl_read16(REG_ZDATA_H, REG_ZDATA_L);
+  //delay(100);
+  //int16_t x = adxl_read16(REG_XDATA_H, REG_XDATA_L);
+  //int16_t y = adxl_read16(REG_YDATA_H, REG_YDATA_L);
+  //int16_t z = adxl_read16(REG_ZDATA_H, REG_ZDATA_L);
 
   // Get range bits from OP_MODE[7:6]
-  uint8_t op_mode = adxl_read8(REG_OP_MODE);
-  uint8_t range_bits = (op_mode >> 6) & 0x03;
+  //uint8_t op_mode = adxl_read8(REG_OP_MODE);
+  //uint8_t range_bits = (op_mode >> 6) & 0x03;
 
   // Convert to g
-
-  float zg = counts_to_g(z, range_bits);
+  //float xg = counts_to_g(x, range_bits);
+  //float yg = counts_to_g(y, range_bits);
+  //float zg = counts_to_g(z, range_bits);
 
   // ---- Serial Plotter output (numbers only!) ----
   // Format: X  Y  Z
-  Serial.print(xg, 5);
+  /*Serial.print(xg, 5);
   Serial.print('\t');
   Serial.print(yg, 5);
   Serial.print('\t');
   Serial.println(zg, 5);
+*/
+int x;
+  //Serial.println(adxl_read8(0x1D));
+  if (counter == 0)
+  {
+    x = millis();
 
-  delay(20);   // ~50 Hz update (adjust as you like)
+  }
+  if (counter == 4000)
+  {
+    int y = millis();
+    Serial.println((y-x));
+    counter = 0;
+  }
+
+
+  if(adxl_read8(0x11) == 0b10000)
+  {
+    values[counter] = adxl_read16(0x1D, 0x1D);
+    //gvalues[counter] = values[counter]/7500.0;
+    counter++;
+
+  }
   
-}*/
+}

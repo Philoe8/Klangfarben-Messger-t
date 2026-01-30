@@ -5,7 +5,7 @@ static const int PIN_MISO = 19;  // MI
 static const int PIN_MOSI = 18;  // MO
 static const int CS_PIN   = 12;   // choose any free GPIO
 
-SPISettings adxlSPI(1000000, MSBFIRST, SPI_MODE0);
+SPISettings adxlSPI(1100000, MSBFIRST, SPI_MODE0);
 
 // Registers
 static const uint8_t REG_DEVID   = 0x00;
@@ -140,15 +140,19 @@ int x;
     int y = millis();
     Serial.println((y-x));
     counter = 0;
+    delay(10000);
   }
-
+  if(adxl_read8(0x11) != 0b10000)
+  {
+    Serial.println("FIFO aus");
+  }
 
   if(adxl_read8(0x11) == 0b10000)
   {
     values[counter] = adxl_read16(0x1D, 0x1D);
     //gvalues[counter] = values[counter]/7500.0;
     counter++;
-
+    //Serial.println(counter);
   }
   
 }

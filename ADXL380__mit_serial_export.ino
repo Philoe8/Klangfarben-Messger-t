@@ -29,6 +29,7 @@ const byte HEADER = 0x02;
 uint16_t values[SAMPLES];
 float gvalues[SAMPLES];
 const int samplingInterval = 125; // 8kHz
+int counter = 0;
 
 
 static inline uint8_t CMD(uint8_t addr, bool read) {
@@ -131,15 +132,19 @@ void loop() {
   Serial.print('\t');
   Serial.println(zg, 5);
 */
-
+  while(counter<SAMPLES)
+  {  
   if(adxl_read8(0x11) == 0b10000)
   {
-    for (int i = 0; i < SAMPLES; i++) {
+    for (int i = 0; i < SAMPLES; i++) 
+    {
       values[i] = adxl_read16(0x1D, 0x1D);
       gvalues[i] = values[i]/7500.0;
+      counter++;
     }
   }
-
+  } 
   Serial.write(HEADER);
   Serial.write((byte*)gvalues, sizeof(gvalues));
 }
+

@@ -1,9 +1,9 @@
 #include <SPI.h>
 
-static const int PIN_SCK  = 5;  // SCK
-static const int PIN_MISO = 19;  // MI
-static const int PIN_MOSI = 18;  // MO
-static const int CS_PIN   = 12;   // choose any free GPIO
+static const int PIN_SCK  = 18;  // SCK
+static const int PIN_MISO = 16;  // MI
+static const int PIN_MOSI = 19;  // MO
+static const int CS_PIN   = 26;   // choose any free GPIO
 
 SPISettings adxlSPI(1100000, MSBFIRST, SPI_MODE0);
 
@@ -145,16 +145,16 @@ while(counter < SAMPLES)
       counter++;    
   }
 } 
-  Serial.write(HEADER);
-  Serial.write((byte*)gvalues, sizeof(gvalues));
+  //Serial.write(HEADER);
+  //Serial.write((byte*)gvalues, sizeof(gvalues));
   //Serial.println(sizeof(gvalues));
   //delay(5000);
-  /*
+  
   for(int j = 0; j<4096;j++)
   {
     Serial.println(gvalues[j]);
    
   }
-  //delay(1000000);
-  */
+  delay(1000000);
+  
 }

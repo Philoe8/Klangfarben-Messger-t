@@ -3,9 +3,9 @@
 #include <WiFiUdp.h>
 
 // --- KONFIGURATION ---
-const char* ssid     = "FRITZ!Box 6660 Cable UP";
-const char* password = "49581136885637492341";
-const char* hostIP   = "192.168.178.43"; 
+const char* ssid     = "Eureek";
+const char* password = "123456789";
+const char* hostIP   = "10.176.66.73"; 
 const int port       = 5005;
 
 WiFiUDP udp;
@@ -18,7 +18,7 @@ const int samplingInterval = 125; // 8kHz exakt
 static const int PIN_SCK  = 18;
 static const int PIN_MISO = 16;
 static const int PIN_MOSI = 19;
-static const int CS_PIN   = 26;
+static const int CS_PIN   = 33;
 SPISettings adxlSPI(1000000, MSBFIRST, SPI_MODE0);
 
 // --- HILFSFUNKTIONEN ---
@@ -91,6 +91,5 @@ void loop() {
         chunkID++;
         delayMicroseconds(400); 
     }
-    
     Serial.println("Batch gesendet");
 }
